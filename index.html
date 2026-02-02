@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Manual Search</title>
+<style>
+#lockScreen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #121826, #0b0f14);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.lock-card {
+  background: #121826;
+  padding: 40px;
+  border-radius: 18px;
+  text-align: center;
+  border: 1px solid rgba(0,229,255,0.3);
+  box-shadow: 0 0 40px rgba(0,229,255,0.2);
+  max-width: 320px;
+  width: 90%;
+}
+
+.lock-card h2 {
+  color: #00e5ff;
+}
+
+.lock-card input {
+  width: 100%;
+  padding: 14px;
+  margin: 16px 0;
+  border-radius: 10px;
+  border: none;
+}
+
+.lock-card button {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 2px solid #00e5ff;
+  background: transparent;
+  color: #00e5ff;
+  cursor: pointer;
+}
+
+.lock-card button:hover {
+  background: #00e5ff;
+  color: #000;
+}
+
+#errorMsg {
+  color: #ff6b6b;
+}
+
+body { font-family: Arial; padding: 15px; }
+input { padding: 10px; width: 100%; font-size: 16px; margin-bottom: 10px; }
+button { padding: 10px; width: 100%; font-size: 16px; }
+.card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+.page {
+  font-weight: bold;
+  font-size: 18px;
+}
+</style>
+</head>
+<body>
+<div id="lockScreen">
+  <div class="lock-card">
+    <h2>🔒 Restricted Access</h2>
+    <p id="projectName"></p>
+    <input type="password" id="passwordInput" placeholder="Enter password">
+    <button onclick="unlock()">Unlock</button>
+    <p id="errorMsg"></p>
+  </div>
+</div>
+
+<h2>Manual Search</h2>
+
+<input id="query" placeholder="Search (e.g. compressor, dryer, 81A)">
+<button onclick="search()">Search</button>
+
+<div id="results"></div>
+
+<!-- Load the OCR data -->
+<script src="data.js"></script>
+
+<script>
+const PROJECT_NAME = "Search";
+const PASSWORD = "Sentinel1";
+
+document.getElementById("projectName").textContent = PROJECT_NAME;
+
+function unlock() {
+  const input = document.getElementById("passwordInput").value;
+  if (input === PASSWORD) {
+    sessionStorage.setItem("p1_unlocked", "yes");
+    document.getElementById("lockScreen").style.display = "none";
+  } else {
+    document.getElementById("errorMsg").textContent = "Incorrect password";
+  }
+}
+
+if (sessionStorage.getItem("p1_unlocked") === "yes") {
+  document.getElementById("lockScreen").style.display = "none";
+}
+
+function search() {
+  const q = document.getElementById("query").value.toLowerCase();
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+
+  let found = false;
+
+  for (let page in data) {
+    if (data[page].includes(q)) {
+      found = true;
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="page">Page ${page}</div>
+        <img src="../images/${page}.jpg" alt="Page ${page}">
+      `;
+
+      resultsDiv.appendChild(card);
+    }
+  }
+
+  if (!found) {
+    resultsDiv.innerHTML = "<p>No matches found.</p>";
+  }
+}
+</script>
+
+</body>
+</html>
